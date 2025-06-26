@@ -1,4 +1,4 @@
-const stripe = Stripe('pk_test_51QNJQe2K4Rvit6akUzYXtwt8QOhL8OUxgrpvCWW3topeqp2mej3a42LHbJGMkZ71vmzQwmcVCS6COZ03HSKtSouC002DSmcHL1');
+const stripe = Stripe('pk_live_51ReEzOLpO3xj2xwl7lJ3ya1IdjO4e3lECl4CK5mXUCLBg0RwyvbXTiQq0RSeIgaLn9DrwH6cDQfJy7ODVMfDUUSo00986ugpUO');
 
 const tiers = [
     { value: 1, tierId: '1_dollar', displayText: 'A DOLLAR', menuText: 'How many paid 1$', linkText: '1$' },

@@ -5,13 +5,11 @@ const db = require('./database'); // Importiamo le nostre funzioni del database
 // =========================================================================
 //           ✅ CHIAVE SEGRETA DI STRIPE INSERITA ✅
 // =========================================================================
-const stripe = require('stripe')('sk_test_51QNJQe2K4Rvit6akyyPzlXnwTY2pImMGcJrsJ8CP83cwLamWKaHegAJyeW51GSmzCwk5PLynZkgAfshdtzk41hv100UUTfS4YL');
-
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 // =========================================================================
 //           ✅ CHIAVE SEGRETA DEL WEBHOOK INSERITA ✅
 // =========================================================================
-const webhookSecret = 'whsec_b624fcd03bafdbdb3c178366d8be045bc264ab6983fe7ae8898c66deacb2f6a4';
-
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 const app = express();
 const PORT = 3000;
