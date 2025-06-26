@@ -9,19 +9,20 @@
 </head>
 <body>
 
+    <!-- Wrapper per Header e Menu a Tendina -->
     <div class="header-wrapper">
         <header class="site-header">
             <a href="/" class="logo-link">
                 <span class="logo-text">Guess who paid... 👀💵</span>
             </a>
             
-            <!-- Menu per Desktop (visibile solo su schermi grandi) -->
+            <!-- Menu Desktop -->
             <nav id="desktop-nav" class="desktop-nav">
                 <span class="see-also-text">See also who paid:</span>
                 <div id="desktop-nav-links" class="desktop-nav-links"></div>
             </nav>
 
-            <!-- Menu Hamburger (visibile solo su schermi piccoli) -->
+            <!-- Menu Hamburger (per mobile) -->
             <button id="menu-toggle" class="menu-toggle-button">
                 <span class="hamburger-bar"></span>
                 <span class="hamburger-bar"></span>
@@ -29,29 +30,55 @@
             </button>
         </header>
 
-        <!-- Menu a tendina per Mobile (compare sotto l'header) -->
+        <!-- Menu a tendina (per mobile) -->
         <div id="mobile-dropdown-menu" class="mobile-dropdown-menu">
             <div class="menu-title">See also:</div>
             <ul id="mobile-menu-items-list" class="menu-items-list"></ul>
         </div>
     </div>
 
-    <!-- Contenuto della pagina -->
+    <!-- Contenuto Principale della Pagina -->
     <div class="main-container">
         <h1>
             HOW MANY PEOPLE PAID <span id="price-text-1">A DOLLAR</span> TO SEE HOW MANY PEOPLE PAID <span id="price-text-2">A DOLLAR</span>?
         </h1>
+ 
         <div class="cta-container">
             <p>CURIOUS? FIND OUT NOW</p>
-            <button id="stripe-button">
+            <!-- CORREZIONE: Usiamo la classe '.stripe-button' invece dell'ID -->
+            <button class="stripe-button"> 
                 <span>Check out with</span> 
-                <img src="assets/stripe.svg" alt="Stripe Logo">
-            </button>
+                <img src="assets/stripe_logo.png" alt="Stripe Logo">
+            </button> 
         </div>
+ 
         <div class="social-icons-container">
-            <!-- icone social qui -->
+            <a href="https://www.tiktok.com/@TUO_PROFILO" target="_blank" class="social-icon tiktok"><img src="assets/tiktok.svg" alt="TikTok"></a>
+            <a href="https://twitter.com/TUO_PROFILO" target="_blank" class="social-icon x-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="50px" height="50px" fill="#FFFFFF"><path d="M 13.085938 13 L 21.023438 13 L 26.660156 21.009766 L 33.5 13 L 36 13 L 27.789062 22.613281 L 37.914062 37 L 29.978516 37 L 23.4375 27.707031 L 15.5 37 L 13 37 L 22.308594 26.103516 L 13.085938 13 z M 16.914062 15 L 31.021484 35 L 34.085938 35 L 19.978516 15 L 16.914062 15 z"/></svg></a>
+            <a href="https://www.facebook.com/TUO_PROFILO" target="_blank" class="social-icon facebook"><img src="assets/facebook.svg" alt="Facebook"></a>
+            <a href="https://www.instagram.com/TUO_PROFILO" target="_blank" class="social-icon instagram"><img src="assets/instagram.svg" alt="Instagram"></a>
         </div>
+
+        <!-- Nuova Sezione "What Happens After You Pay?" -->
+        <section class="what-happens-section">
+            <h2 class="section-title">WHAT HAPPENS AFTER YOU PAY?</h2>
+            <p class="section-description">You will get to know the number of the total people who paid.</p>
+            <img src="assets/censored.png" alt="A censored preview of the result page" class="result-preview-image">
+            
+            <div class="second-cta-container">
+                <!-- CORREZIONE: Secondo pulsante, con la stessa classe del primo -->
+                <button class="stripe-button"> 
+                    <span>Check out with</span> 
+                    <img src="assets/stripe_logo.png" alt="Stripe Logo">
+                </button> 
+            </div>
+        </section>
     </div>
+
+    <footer class="site-footer-bottom">
+        <p>&copy; 2024 Guess Who Paid. All Rights Reserved.</p>
+        <p><a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms of Service</a></p>
+    </footer>
     
     <script src="script.js"></script>
 </body>

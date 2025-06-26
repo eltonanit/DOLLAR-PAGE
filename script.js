@@ -10,16 +10,19 @@ const tiers = [
     { value: 999999, tierId: '1M_dollars', displayText: '1 MILLION DOLLARS', menuText: 'How many paid 1,000,000$', linkText: '1 Million $$$' }
 ];
 
-// Elementi UI
+// Elementi UI Principali
 const priceText1 = document.getElementById('price-text-1');
 const priceText2 = document.getElementById('price-text-2');
-const stripeButton = document.getElementById('stripe-button');
-// Elementi Menu Mobile
+
+// MODIFICA: Selezioniamo tutti i pulsanti Stripe tramite la loro classe
+const stripeButtons = document.querySelectorAll('.stripe-button');
+
+// Elementi Menu Mobile (a tendina)
 const menuToggle = document.getElementById('menu-toggle');
-const menuClose = document.getElementById('menu-close');
-const mobileMenu = document.getElementById('mobile-menu');
-const menuItemsList = document.getElementById('menu-items-list');
-// Elementi Menu Desktop
+const mobileDropdownMenu = document.getElementById('mobile-dropdown-menu');
+const mobileMenuItemsList = document.getElementById('mobile-menu-items-list');
+
+// Elementi Menu Desktop (orizzontale)
 const desktopNavLinks = document.getElementById('desktop-nav-links');
 
 // FUNZIONE CENTRALE: Aggiorna il contenuto della pagina
@@ -29,117 +32,107 @@ function updatePageContent(selectedTierId) {
 
     priceText1.textContent = selectedTier.displayText;
     priceText2.textContent = selectedTier.displayText;
-    stripeButton.dataset.price = selectedTier.value;
-    stripeButton.dataset.tierId = selectedTier.tierId;
-    stripeButton.dataset.dropdownText = `${selectedTier.menuText}? Find out now.`;
+    
+    // MODIFICA: Aggiorniamo i dati su TUTTI i pulsanti
+    stripeButtons.forEach(button => {
+        button.dataset.price = selectedTier.value;
+        button.dataset.tierId = selectedTier.tierId;
+        button.dataset.dropdownText = `${selectedTier.menuText}? Find out now.`;
+    });
 
-    // Dopo aver aggiornato la pagina, aggiorna anche i link "See also:"
+    // Aggiorna anche il menu desktop per riflettere la nuova selezione
     updateDesktopNav(selectedTierId);
 }
 
-// Funzione per popolare il menu a comparsa (Mobile) - AGGIORNATA
-function populateSideMenu() {
-    menuItemsList.innerHTML = ''; // Pulisce il menu
-
-    // Aggiungiamo un titolo "See also:"
-    const titleItem = document.createElement('li');
-    titleItem.classList.add('menu-title'); // Aggiungiamo una classe per lo stile
-    titleItem.textContent = 'See also who paid:';
-    menuItemsList.appendChild(titleItem);
-
-    // Creiamo i link per ogni livello
+// Funzione per popolare il menu a tendina MOBILE
+function populateMobileMenu() {
+    mobileMenuItemsList.innerHTML = '';
     tiers.forEach(tier => {
         const listItem = document.createElement('li');
         const link = document.createElement('a');
         link.href = '#';
         link.dataset.tierId = tier.tierId;
-
-        // Creiamo il testo con lo span per il dollaro verde
-        const textContent = tier.linkText.replace(/\s?\${1,3}$/, '');
+        const phrase = "How many paid ";
+        const priceText = tier.linkText.replace(/\s?\${1,3}$/, '');
         const dollarSign = tier.linkText.includes('$$$') ? '$$$' : '$';
-        link.innerHTML = `${textContent}<span class="dollar-sign">${dollarSign}</span>`;
-        
+        link.innerHTML = `${phrase}<strong>${priceText}</strong><span class="dollar-sign">${dollarSign}</span>`;
         listItem.appendChild(link);
-        menuItemsList.appendChild(listItem);
+        mobileMenuItemsList.appendChild(listItem);
     });
 }
 
-// =====================================================================
-//           ⬇️ QUESTA È LA FUNZIONE CHE ABBIAMO CORRETTO ⬇️
-// =====================================================================
-// Funzione per aggiornare il menu di navigazione desktop ("See also")
+// Funzione per popolare il menu DESKTOP
 function updateDesktopNav(currentTierId) {
-    desktopNavLinks.innerHTML = ''; // Pulisce i link precedenti
+    desktopNavLinks.innerHTML = '';
     tiers
-        .filter(t => t.tierId !== currentTierId) // Mostra tutti i livelli TRANNE quello attuale
+        .filter(t => t.tierId !== currentTierId)
         .forEach(tier => {
             const link = document.createElement('a');
             link.href = '#';
             link.dataset.tierId = tier.tierId;
-
-            // Dividiamo il testo dal simbolo del dollaro
-            // Questa espressione regolare rimuove '$' o '$$$' alla fine del testo
-            const textContent = tier.linkText.replace(/\s?\${1,3}$/, ''); 
+            const textContent = tier.linkText.replace(/\s?\${1,3}$/, '');
             const dollarSign = tier.linkText.includes('$$$') ? '$$$' : '$';
-            
-            // Creiamo il contenuto del link con span separati
-            // In questo modo il CSS può applicare lo stile solo allo span ".dollar-sign"
             link.innerHTML = `${textContent}<span class="dollar-sign">${dollarSign}</span>`;
-            
             desktopNavLinks.appendChild(link);
         });
 }
-// =====================================================================
 
-// Event Listeners
+// Funzione per aprire/chiudere il menu a tendina MOBILE
+function toggleMobileMenu() {
+    menuToggle.classList.toggle('is-active');
+    mobileDropdownMenu.classList.toggle('is-open');
+}
+
+// Funzione per impostare tutti gli "ascoltatori di eventi"
 function setupEventListeners() {
     // Menu Mobile
-    menuToggle.addEventListener('click', () => mobileMenu.classList.add('is-open'));
-    menuClose.addEventListener('click', () => mobileMenu.classList.remove('is-open'));
-    menuItemsList.addEventListener('click', (event) => {
+    menuToggle.addEventListener('click', toggleMobileMenu);
+    mobileMenuItemsList.addEventListener('click', (event) => {
         event.preventDefault();
-        const tierId = event.target.dataset.tierId;
-        if (tierId) {
-            updatePageContent(tierId);
-            mobileMenu.classList.remove('is-open');
+        const linkElement = event.target.closest('a');
+        if (linkElement && linkElement.dataset.tierId) {
+            updatePageContent(linkElement.dataset.tierId);
+            if (mobileDropdownMenu.classList.contains('is-open')) {
+                toggleMobileMenu();
+            }
         }
     });
 
     // Menu Desktop
     desktopNavLinks.addEventListener('click', (event) => {
         event.preventDefault();
-        const tierId = event.target.dataset.tierId;
-        // Bisogna controllare se l'elemento cliccato è il link 'a' o lo span interno
         const linkElement = event.target.closest('a');
         if (linkElement && linkElement.dataset.tierId) {
             updatePageContent(linkElement.dataset.tierId);
         }
     });
-
-    // Pulsante Stripe
-    stripeButton.addEventListener('click', async () => {
-        const price = stripeButton.dataset.price;
-        const tierId = stripeButton.dataset.tierId;
-        const dropdownText = stripeButton.dataset.dropdownText;
-        try {
-            const response = await fetch('/create-checkout-session', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ price: parseFloat(price), tierId, dropdownText }),
-            });
-            const session = await response.json();
-            if (session.id) {
-                stripe.redirectToCheckout({ sessionId: session.id });
+    
+    // MODIFICA: Aggiungiamo l'event listener a TUTTI i pulsanti Stripe
+    stripeButtons.forEach(button => {
+        button.addEventListener('click', async () => {
+            const price = button.dataset.price;
+            const tierId = button.dataset.tierId;
+            const dropdownText = button.dataset.dropdownText;
+            try {
+                const response = await fetch('/create-checkout-session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ price: parseFloat(price), tierId, dropdownText }),
+                });
+                const session = await response.json();
+                if (session.id) {
+                    stripe.redirectToCheckout({ sessionId: session.id });
+                }
+            } catch (error) {
+                console.error('Error:', error);
             }
-        } catch (error) {
-            console.error('Error:', error);
-        }
+        });
     });
 }
 
-// Funzione di Inizializzazione
+// Funzione di Inizializzazione della pagina
 function initializePage() {
-    populateSideMenu();
+    populateMobileMenu();
     
     const urlParams = new URLSearchParams(window.location.search);
     const tierIdFromUrl = urlParams.get('tierId');

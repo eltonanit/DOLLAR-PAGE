@@ -7,11 +7,9 @@ body {
     color: #333;
     margin: 0;
     text-align: center;
-    /* La transizione qui rende fluido il movimento del main-container */
-    transition: padding-top 0.4s ease-in-out;
 }
 
-/* --- WRAPPER PER HEADER E MENU A TENDINA --- */
+/* --- WRAPPER PER HEADER --- */
 .header-wrapper {
     position: fixed;
     top: 0;
@@ -30,8 +28,8 @@ body {
     box-sizing: border-box;
     background-color: #ffffff;
     border-bottom: 1px solid #f0f0f0;
-    position: relative; /* Necessario per lo z-index */
-    z-index: 101; /* Sta sopra il menu a tendina */
+    position: relative;
+    z-index: 101;
 }
 .logo-link { text-decoration: none; }
 .logo-text { font-family: 'Fredoka One', cursive; font-size: 1.5rem; color: #000000; }
@@ -59,79 +57,188 @@ body {
     background-color: #fff;
     width: 100%;
     overflow: hidden;
-    max-height: 0; /* Nascosto */
+    max-height: 0;
     transition: max-height 0.4s ease-in-out;
     border-bottom: 1px solid #f0f0f0;
 }
 .mobile-dropdown-menu.is-open {
-    max-height: 80vh; /* Altezza massima quando aperto (evita di coprire tutta la pagina) */
+    max-height: 80vh;
 }
 .mobile-dropdown-menu .menu-title {
     font-size: 1rem;
-    font-weight: 700;
-    color: #888;
+    color: #072001;
     text-transform: uppercase;
     letter-spacing: 1px;
-    padding: 20px 0 10px 0;
+    font-weight: 700;
+    font-size: larger;
+    padding: 20px 30px 10px 30px;
+    text-align: center;
 }
 .mobile-dropdown-menu .menu-items-list {
     list-style: none;
     padding: 0;
     margin: 0;
-    max-height: calc(80vh - 60px); /* Altezza massima - padding del titolo */
+    max-height: calc(80vh - 60px);
     overflow-y: auto;
 }
 .mobile-dropdown-menu .menu-items-list li a {
     display: block;
     padding: 20px 30px;
     font-size: 1.2rem;
-    color: #333;
+    color: #000000;
+    font-weight: 700;
     text-decoration: none;
     border-top: 1px solid #f0f0f0;
     transition: background-color 0.2s;
-    text-align: left; /* Testo a sinistra */
+    text-align: left;
 }
 .mobile-dropdown-menu .menu-items-list li a:hover {
-    background-color: #f7f7f7;
+    background-color: #ccffae;
+}
+.mobile-dropdown-menu .menu-items-list li a strong {
+    color: #000;
+    font-weight: 700;
+}
+.mobile-dropdown-menu .dollar-sign {
+    color: #22af5d;
+    margin-left: 5px;
 }
 
 /* --- CONTENUTO PRINCIPALE --- */
 .main-container {
     max-width: 800px;
     padding: 20px;
-    margin: 0 auto; /* Centra orizzontalmente */
-    padding-top: 100px; /* Spazio per l'header fisso */
+    margin: 0 auto;
+    padding-top: 100px;
 }
-h1 { font-size: 2.5rem; font-weight: 700; color: #1A8A94; line-height: 1.4; margin-bottom: 40px; }
-.cta-container p { font-size: 1rem; color: #888; letter-spacing: 1px; }
-#stripe-button {
-    background-color: #f6c845; color: #003087; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 1.2rem; border: none; padding: 15px 30px; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); transition: all 0.2s ease-in-out; display: inline-flex; align-items: center; gap: 12px;
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1A8A94;
+    line-height: 1.4;
+    margin-bottom: 60px;
 }
-#stripe-button:hover { box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); transform: translateY(-2px); }
-#stripe-button img { height: 20px; }
+.cta-container p {
+    font-size: 1.5rem;
+    color: #434242;
+    font-weight: 500;
+    letter-spacing: 1px;
+    margin-bottom: 25px;
+}
 
-/* --- ICONE SOCIAL (spostate qui per ordine) --- */
-.social-icons-container { margin-top: 30px; display: flex; justify-content: center; gap: 15px; }
-.social-icon { display: inline-flex; justify-content: center; align-items: center; width: 44px; height: 44px; border-radius: 50%; transition: transform 0.2s; }
-.social-icon:hover { transform: scale(1.1); }
-.social-icon img, .social-icon svg { height: 24px; width: 24px; }
+/* MODIFICA: da #stripe-button a .stripe-button per renderlo riutilizzabile */
+.stripe-button {
+    background-color: #f6c845;
+    color: #003087;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 1.3rem;
+    border: none;
+    padding: 15px 15px;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+}
+.stripe-button:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+.stripe-button img {
+    height: 40px;
+}
+
+/* --- ICONE SOCIAL --- */
+.social-icons-container {
+    margin-top: 50px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+.social-icon {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 25%;
+    transition: transform 0.2s;
+}
+.social-icon:hover {
+    transform: scale(1.4);
+}
+.social-icon img, .social-icon svg {
+    height: 34px;
+    width: 34px;
+}
 .social-icon.tiktok { background-color: #000000; }
 .social-icon.x-logo { background-color: #000000; }
-.social-icon.linkedin { background-color: #0077B5; }
 .social-icon.facebook { background-color: #1877F2; }
 .social-icon.instagram { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); }
 
-/* ======================================================= */
-/*                   LOGICA RESPONSIVE                     */
-/* ======================================================= */
+/* --- NUOVA SEZIONE: WHAT HAPPENS AFTER --- */
+.what-happens-section {
+    margin-top: 80px;
+    padding-top: 60px;
+    border-top: 1px solid #e0e0e0;
+    text-align: center;
+}
+.what-happens-section .section-title {
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif, cursive;
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 15px;
+}
+.what-happens-section .section-description {
+    font-size: 1.2rem;
+    color: #0c0c4a;
+    max-width: 500px;
+    margin: 0 auto 40px auto;
+}
+.result-preview-image {
+    max-width: 100%;
+    width: 600px;
+    border-radius: 40px;
+    box-shadow: 20px 25px 20px rgba(74, 61, 61, 0.4);
+    margin-bottom: 40px;
+}
 
-/* --- Stili per MOBILE (default) --- */
+/* --- FOOTER --- */
+.site-footer-bottom {
+    background-color: #ffffff;
+    color: #656464;
+    text-align: center;
+    padding: 20px 30px;
+    border-top: 1px solid #f0f0f0;
+    margin-top: 60px; /* Spazio sopra il footer */
+}
+
+.site-footer-bottom p {
+    margin: 5px 0;
+    font-size: 0.9rem;
+}
+
+.site-footer-bottom a {
+    color: #333;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.site-footer-bottom a:hover {
+    text-decoration: underline;
+}
+
+/* --- LOGICA RESPONSIVE --- */
+/* Stili per MOBILE (default) */
 .desktop-nav { display: none; }
 .menu-toggle-button { display: flex; }
 
-/* --- Stili per DESKTOP (schermi più grandi di 992px) --- */
+/* Stili per DESKTOP (schermi più grandi di 992px) */
 @media (min-width: 992px) {
     .desktop-nav { display: flex; }
     .menu-toggle-button { display: none; }
-    .mobile-dropdown-menu { display: none; } /* Nascondiamo del tutto il menu mobile su desktop */
+    .mobile-dropdown-menu { display: none; }
 }
