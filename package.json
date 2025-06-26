@@ -10,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.19.2",
-    "sqlite3": "^5.1.7",
+    "pg": "^8.11.5",
     "stripe": "^15.8.0"
   }
 }
