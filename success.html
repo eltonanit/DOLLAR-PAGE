@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Success!</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Aggiungiamo un padding-top per non nascondere il contenuto sotto la navbar fissa */
+        .result-container {
+            padding-top: 100px;
+            padding-bottom: 50px;
+        }
+
+        .count-number {
+            font-size: 10rem;
+            font-weight: 700;
+            color: #000000;
+            line-height: 1;
+        }
+        .main-text {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1693A5;
+            margin-top: 20px;
+            max-width: 600px;
+        }
+        .sub-text {
+            font-size: 1.2rem;
+            color: #888888;
+            margin-top: 40px;
+        }
+        .friends-text {
+            font-size: 1rem;
+            color: #aaaaaa;
+            margin-top: 10px;
+        }
+        .social-icons-container {
+            margin-top: 30px;
+        }
+        .timestamp-container {
+            margin-top: 50px;
+            font-family: 'Courier New', Courier, monospace;
+            color: #aaaaaa;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+        .see-also-container {
+            margin-top: 30px;
+            text-align: center;
+        }
+        .see-also-container h3 {
+            font-weight: normal;
+            color: #888888;
+            margin-bottom: 15px;
+        }
+        .see-also-container a {
+            display: inline-block;
+            margin: 5px;
+            padding: 8px 15px;
+            background-color: #f0f0f0;
+            color: #333;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+        .see-also-container a:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 👇 NUOVO HEADER COPIATO DA INDEX.HTML 👇 -->
+    <header class="site-header">
+        <a href="/" class="logo-link">
+            <span class="logo-text">Guess who paid... 👀💵</span>
+        </a>
+        <button id="menu-toggle" class="menu-toggle-button">
+            <span class="hamburger-bar"></span>
+            <span class="hamburger-bar"></span>
+            <span class="hamburger-bar"></span>
+        </button>
+    </header>
+
+    <!-- 👇 NUOVO MENU A COMPARSA COPIATO DA INDEX.HTML 👇 -->
+    <nav id="mobile-menu" class="side-menu">
+        <div class="side-menu-header">
+            <button id="menu-close" class="menu-close-button">×</button>
+        </div>
+        <ul id="menu-items-list" class="menu-items-list">
+            <!-- Popolato dal JavaScript -->
+        </ul>
+    </nav>
+
+
+    <!-- Contenuto della pagina di successo -->
+    <div class="result-container">
+        <div id="count-number" class="count-number">...</div>
+        <p class="main-text">
+            PEOPLE PAID <span id="tier-text">A DOLLAR</span> TO SEE HOW MANY PEOPLE PAID <span id="tier-text-2">A DOLLAR</span>.
+        </p>
+        <p class="sub-text">(INCLUDING YOU!)</p>
+        <p class="friends-text">TELL YOUR FRIENDS.</p>
+        <div class="social-icons-container">
+            <a href="#" target="_blank" class="social-icon tiktok"><img src="assets/tiktok.svg" alt="TikTok"></a>
+            <a href="#" target="_blank" class="social-icon x-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="50px" height="50px" fill="#FFFFFF"><path d="M 13.085938 13 L 21.023438 13 L 26.660156 21.009766 L 33.5 13 L 36 13 L 27.789062 22.613281 L 37.914062 37 L 29.978516 37 L 23.4375 27.707031 L 15.5 37 L 13 37 L 22.308594 26.103516 L 13.085938 13 z M 16.914062 15 L 31.021484 35 L 34.085938 35 L 19.978516 15 L 16.914062 15 z"/></svg></a>
+            <a href="#" target="_blank" class="social-icon linkedin"></a>
+            <a href="#" target="_blank" class="social-icon facebook"><img src="assets/facebook.svg" alt="Facebook"></a>
+            <a href="#" target="_blank" class="social-icon instagram"><img src="assets/instagram.svg" alt="Instagram"></a>
+        </div>
+        <div class="timestamp-container" id="timestamp-container">
+            AS OF<br>
+            <span id="timestamp"></span>
+        </div>
+        <div class="see-also-container">
+            <h3>See also:</h3>
+            <div id="see-also-links"></div>
+        </div>
+    </div>
+
+    <script>
+        const tiers = [
+            { value: 1, tierId: '1_dollar', displayText: 'A DOLLAR', menuText: 'How many paid 1$', linkText: '1$' },
+            { value: 10, tierId: '10_dollars', displayText: '10 DOLLARS', menuText: 'How many paid 10$', linkText: '10$' },
+            { value: 100, tierId: '100_dollars', displayText: '100 DOLLARS', menuText: 'How many paid 100$', linkText: '100$' },
+            { value: 1000, tierId: '1000_dollars', displayText: '1,000 DOLLARS', menuText: 'How many paid 1,000$', linkText: '1,000$' },
+            { value: 10000, tierId: '10000_dollars', displayText: '10,000 DOLLARS', menuText: 'How many paid 10,000$', linkText: '10,000$' },
+            { value: 100000, tierId: '100000_dollars', displayText: '100,000 DOLLARS', menuText: 'How many paid 100,000$', linkText: '100,000$' },
+{ 
+    value: 999999,  // <-- Il valore REALE inviato a Stripe
+    tierId: '1M_dollars', 
+    displayText: '1 MILLION DOLLARS', // <-- Quello che vede l'utente nel titolo H1
+    menuText: 'How many paid 1,000,000$', // <-- Quello che vede l'utente nel menu
+    linkText: '1M$' // <-- Per la pagina di successo
+}        ];
+
+        window.onload = async () => {
+            // --- LOGICA DELLA PAGINA DI SUCCESSO (esistente) ---
+            const countElement = document.getElementById('count-number');
+            const tierTextElement = document.getElementById('tier-text');
+            const tierTextElement2 = document.getElementById('tier-text-2');
+            const timestampElement = document.getElementById('timestamp');
+            const seeAlsoLinksContainer = document.getElementById('see-also-links');
+            const urlParams = new URLSearchParams(window.location.search);
+            const tierId = urlParams.get('tierId');
+
+            // --- LOGICA DEL MENU (aggiunta) ---
+            const menuToggle = document.getElementById('menu-toggle');
+            const menuClose = document.getElementById('menu-close');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuItemsList = document.getElementById('menu-items-list');
+
+            // Funzione per popolare il menu laterale
+            function populateSideMenu() {
+                menuItemsList.innerHTML = '';
+                tiers.forEach(tier => {
+                    const listItem = document.createElement('li');
+                    const link = document.createElement('a');
+                    link.href = `/?tierId=${tier.tierId}`; // Linka alla pagina principale
+                    link.textContent = tier.menuText;
+                    listItem.appendChild(link);
+                    menuItemsList.appendChild(listItem);
+                });
+            }
+            
+            // Event listener per aprire e chiudere il menu
+            menuToggle.addEventListener('click', () => { mobileMenu.classList.add('is-open'); });
+            menuClose.addEventListener('click', () => { mobileMenu.classList.remove('is-open'); });
+            
+            // Popoliamo il menu
+            populateSideMenu();
+            // --- FINE LOGICA DEL MENU ---
+
+            if (!tierId) {
+                countElement.textContent = 'Error';
+                return;
+            }
+            
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' };
+            timestampElement.textContent = now.toLocaleDateString('en-US', options).toUpperCase();
+            
+            tiers.filter(t => t.tierId !== tierId).forEach(tier => {
+                const link = document.createElement('a');
+                link.href = `/?tierId=${tier.tierId}`; // Modificato per coerenza
+                link.textContent = tier.linkText;
+                seeAlsoLinksContainer.appendChild(link);
+            });
+
+            const selectedTier = tiers.find(t => t.tierId === tierId);
+            if (selectedTier) {
+                tierTextElement.textContent = selectedTier.displayText;
+                tierTextElement2.textContent = selectedTier.displayText;
+            }
+
+            try {
+                setTimeout(async () => {
+                    const response = await fetch(`/get-count/${tierId}`);
+                    if (!response.ok) throw new Error('Failed to fetch count');
+                    const data = await response.json();
+                    countElement.textContent = data.count;
+                }, 500);
+            } catch (error) {
+                console.error('Error:', error);
+                countElement.textContent = 'X';
+            }
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess Who Paid</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+
+    <div class="header-wrapper">
+        <header class="site-header">
+            <a href="/" class="logo-link">
+                <span class="logo-text">Guess who paid... 👀💵</span>
+            </a>
+            
+            <!-- Menu per Desktop (visibile solo su schermi grandi) -->
+            <nav id="desktop-nav" class="desktop-nav">
+                <span class="see-also-text">See also who paid:</span>
+                <div id="desktop-nav-links" class="desktop-nav-links"></div>
+            </nav>
+
+            <!-- Menu Hamburger (visibile solo su schermi piccoli) -->
+            <button id="menu-toggle" class="menu-toggle-button">
+                <span class="hamburger-bar"></span>
+                <span class="hamburger-bar"></span>
+                <span class="hamburger-bar"></span>
+            </button>
+        </header>
+
+        <!-- Menu a tendina per Mobile (compare sotto l'header) -->
+        <div id="mobile-dropdown-menu" class="mobile-dropdown-menu">
+            <div class="menu-title">See also:</div>
+            <ul id="mobile-menu-items-list" class="menu-items-list"></ul>
+        </div>
+    </div>
+
+    <!-- Contenuto della pagina -->
+    <div class="main-container">
+        <h1>
+            HOW MANY PEOPLE PAID <span id="price-text-1">A DOLLAR</span> TO SEE HOW MANY PEOPLE PAID <span id="price-text-2">A DOLLAR</span>?
+        </h1>
+        <div class="cta-container">
+            <p>CURIOUS? FIND OUT NOW</p>
+            <button id="stripe-button">
+                <span>Check out with</span> 
+                <img src="assets/stripe.svg" alt="Stripe Logo">
+            </button>
+        </div>
+        <div class="social-icons-container">
+            <!-- icone social qui -->
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
