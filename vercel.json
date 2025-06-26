@@ -8,24 +8,8 @@
   ],
   "routes": [
     {
-      "src": "/create-checkout-session",
-      "dest": "/server.js"
-    },
-    {
-      "src": "/stripe-webhook",
-      "dest": "/server.js"
-    },
-    {
-      "src": "/get-count",
-      "dest": "/server.js"
-    },
-    {
-      "src": "/(.*\\.(?:css|js|ico|png|jpg|jpeg|gif|svg))$",
-      "dest": "/$1"
-    },
-    {
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "/server.js"
     }
   ]
 }
