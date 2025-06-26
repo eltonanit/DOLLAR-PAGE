@@ -13,8 +13,6 @@ const tiers = [
 // Elementi UI Principali
 const priceText1 = document.getElementById('price-text-1');
 const priceText2 = document.getElementById('price-text-2');
-
-// MODIFICA: Selezioniamo tutti i pulsanti Stripe tramite la loro classe
 const stripeButtons = document.querySelectorAll('.stripe-button');
 
 // Elementi Menu Mobile (a tendina)
@@ -25,7 +23,6 @@ const mobileMenuItemsList = document.getElementById('mobile-menu-items-list');
 // Elementi Menu Desktop (orizzontale)
 const desktopNavLinks = document.getElementById('desktop-nav-links');
 
-// FUNZIONE CENTRALE: Aggiorna il contenuto della pagina
 function updatePageContent(selectedTierId) {
     const selectedTier = tiers.find(tier => tier.tierId === selectedTierId);
     if (!selectedTier) return;
@@ -33,18 +30,15 @@ function updatePageContent(selectedTierId) {
     priceText1.textContent = selectedTier.displayText;
     priceText2.textContent = selectedTier.displayText;
     
-    // MODIFICA: Aggiorniamo i dati su TUTTI i pulsanti
     stripeButtons.forEach(button => {
         button.dataset.price = selectedTier.value;
         button.dataset.tierId = selectedTier.tierId;
         button.dataset.dropdownText = `${selectedTier.menuText}? Find out now.`;
     });
 
-    // Aggiorna anche il menu desktop per riflettere la nuova selezione
     updateDesktopNav(selectedTierId);
 }
 
-// Funzione per popolare il menu a tendina MOBILE
 function populateMobileMenu() {
     mobileMenuItemsList.innerHTML = '';
     tiers.forEach(tier => {
@@ -61,7 +55,6 @@ function populateMobileMenu() {
     });
 }
 
-// Funzione per popolare il menu DESKTOP
 function updateDesktopNav(currentTierId) {
     desktopNavLinks.innerHTML = '';
     tiers
@@ -77,15 +70,12 @@ function updateDesktopNav(currentTierId) {
         });
 }
 
-// Funzione per aprire/chiudere il menu a tendina MOBILE
 function toggleMobileMenu() {
     menuToggle.classList.toggle('is-active');
     mobileDropdownMenu.classList.toggle('is-open');
 }
 
-// Funzione per impostare tutti gli "ascoltatori di eventi"
 function setupEventListeners() {
-    // Menu Mobile
     menuToggle.addEventListener('click', toggleMobileMenu);
     mobileMenuItemsList.addEventListener('click', (event) => {
         event.preventDefault();
@@ -98,7 +88,6 @@ function setupEventListeners() {
         }
     });
 
-    // Menu Desktop
     desktopNavLinks.addEventListener('click', (event) => {
         event.preventDefault();
         const linkElement = event.target.closest('a');
@@ -107,7 +96,6 @@ function setupEventListeners() {
         }
     });
     
-    // MODIFICA: Aggiungiamo l'event listener a TUTTI i pulsanti Stripe
     stripeButtons.forEach(button => {
         button.addEventListener('click', async () => {
             const price = button.dataset.price;
@@ -119,18 +107,39 @@ function setupEventListeners() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ price: parseFloat(price), tierId, dropdownText }),
                 });
+                
+                // Aggiungiamo un controllo per l'errore 404
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const session = await response.json();
                 if (session.id) {
                     stripe.redirectToCheckout({ sessionId: session.id });
                 }
             } catch (error) {
-                console.error('Error:', error);
+                // Modifichiamo il log dell'errore per essere più specifici
+                console.error('Error during checkout session creation:', error);
             }
         });
     });
 }
 
-// Funzione di Inizializzazione della pagina
+// NUOVO - Funzione per caricare i conteggi iniziali dal server
+async function loadInitialCounts() {
+    try {
+        const response = await fetch('/get-count');
+        if (!response.ok) {
+            throw new Error(`Network response was not ok for /get-count. Status: ${response.status}`);
+        }
+        const counts = await response.json();
+        console.log('Initial counts loaded successfully:', counts);
+        // Qui potresti aggiungere la logica per mostrare i conteggi se lo desideri
+    } catch (error) {
+        console.error('Failed to load initial counts:', error);
+    }
+}
+
 function initializePage() {
     populateMobileMenu();
     
@@ -143,7 +152,9 @@ function initializePage() {
     }
     
     setupEventListeners();
+
+    // NUOVO - Chiamiamo la funzione per caricare i conteggi all'avvio
+    loadInitialCounts(); 
 }
 
-// Avvio
 initializePage();
