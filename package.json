@@ -1,7 +1,16 @@
 {
+  "name": "guess-who-paid",
+  "version": "1.0.0",
+  "description": "A curiosity-driven web application.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "express": "^5.1.0",
+    "express": "^4.19.2",
     "sqlite3": "^5.1.7",
-    "stripe": "^18.2.1"
+    "stripe": "^15.8.0"
   }
 }
