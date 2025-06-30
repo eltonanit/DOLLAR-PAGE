@@ -1,5 +1,7 @@
+// Inizializza Stripe con la tua chiave pubblicabile LIVE
 const stripe = Stripe('pk_live_51RfisKE7EuHepzpAVQYjF9ItCjm1JhgHFpfxbcWCpQ7GBJScYC4fxyNKf57Qg5OAqWFdm1nioj25QGnmtoQnYZql00rnKEQTff');
 
+// Definisce i livelli di prezzo e i testi associati
 const tiers = [
     { value: 1, tierId: '1_dollar', displayText: 'A DOLLAR', menuText: 'How many paid 1$', linkText: '1$' },
     { value: 10, tierId: '10_dollars', displayText: '10 DOLLARS', menuText: 'How many paid 10$', linkText: '10$' },
@@ -10,150 +12,134 @@ const tiers = [
     { value: 999999, tierId: '1M_dollars', displayText: '1 MILLION DOLLARS', menuText: 'How many paid 1,000,000$', linkText: '1 Million $$$' }
 ];
 
-// Elementi UI Principali
-const priceText1 = document.getElementById('price-text-1');
-const priceText2 = document.getElementById('price-text-2');
-const stripeButtons = document.querySelectorAll('.stripe-button');
-
-// Elementi Menu Mobile (a tendina)
-const menuToggle = document.getElementById('menu-toggle');
-const mobileDropdownMenu = document.getElementById('mobile-dropdown-menu');
-const mobileMenuItemsList = document.getElementById('mobile-menu-items-list');
-
-// Elementi Menu Desktop (orizzontale)
-const desktopNavLinks = document.getElementById('desktop-nav-links');
-
-function updatePageContent(selectedTierId) {
-    const selectedTier = tiers.find(tier => tier.tierId === selectedTierId);
-    if (!selectedTier) return;
-
-    priceText1.textContent = selectedTier.displayText;
-    priceText2.textContent = selectedTier.displayText;
+// Esegui tutto il codice solo dopo che il DOM è stato caricato
+document.addEventListener('DOMContentLoaded', () => {
     
-    stripeButtons.forEach(button => {
-        button.dataset.price = selectedTier.value;
-        button.dataset.tierId = selectedTier.tierId;
-        button.dataset.dropdownText = `${selectedTier.menuText}? Find out now.`;
-    });
+    // Seleziona gli elementi UI una sola volta
+    const priceText1 = document.getElementById('price-text-1');
+    const priceText2 = document.getElementById('price-text-2');
+    const stripeButtons = document.querySelectorAll('.stripe-button');
+    const menuToggle = document.getElementById('menu-toggle');
+    const mobileDropdownMenu = document.getElementById('mobile-dropdown-menu');
+    const mobileMenuItemsList = document.getElementById('mobile-menu-items-list');
+    const desktopNavLinks = document.getElementById('desktop-nav-links');
 
-    updateDesktopNav(selectedTierId);
-}
+    // Aggiorna dinamicamente il testo principale e i dati dei pulsanti
+    function updatePageContent(selectedTierId) {
+        const selectedTier = tiers.find(tier => tier.tierId === selectedTierId);
+        if (!selectedTier) return;
 
-function populateMobileMenu() {
-    mobileMenuItemsList.innerHTML = '';
-    tiers.forEach(tier => {
-        const listItem = document.createElement('li');
-        const link = document.createElement('a');
-        link.href = '#';
-        link.dataset.tierId = tier.tierId;
-        const phrase = "How many paid ";
-        const priceText = tier.linkText.replace(/\s?\${1,3}$/, '');
-        const dollarSign = tier.linkText.includes('$$$') ? '$$$' : '$';
-        link.innerHTML = `${phrase}<strong>${priceText}</strong><span class="dollar-sign">${dollarSign}</span>`;
-        listItem.appendChild(link);
-        mobileMenuItemsList.appendChild(listItem);
-    });
-}
+        priceText1.textContent = selectedTier.displayText;
+        priceText2.textContent = selectedTier.displayText;
+        
+        stripeButtons.forEach(button => {
+            button.dataset.price = selectedTier.value;
+            button.dataset.tierId = selectedTier.tierId;
+            button.dataset.dropdownText = `${selectedTier.menuText}? Find out now.`;
+        });
 
-function updateDesktopNav(currentTierId) {
-    desktopNavLinks.innerHTML = '';
-    tiers
-        .filter(t => t.tierId !== currentTierId)
-        .forEach(tier => {
+        updateDesktopNav(selectedTierId);
+    }
+
+    // Popola il menu a tendina per dispositivi mobili
+    function populateMobileMenu() {
+        mobileMenuItemsList.innerHTML = '';
+        tiers.forEach(tier => {
+            const listItem = document.createElement('li');
             const link = document.createElement('a');
             link.href = '#';
             link.dataset.tierId = tier.tierId;
-            const textContent = tier.linkText.replace(/\s?\${1,3}$/, '');
+            const phrase = "How many paid ";
+            const priceText = tier.linkText.replace(/\s?\${1,3}$/, '');
             const dollarSign = tier.linkText.includes('$$$') ? '$$$' : '$';
-            link.innerHTML = `${textContent}<span class="dollar-sign">${dollarSign}</span>`;
-            desktopNavLinks.appendChild(link);
+            link.innerHTML = `${phrase}<strong>${priceText}</strong><span class="dollar-sign">${dollarSign}</span>`;
+            listItem.appendChild(link);
+            mobileMenuItemsList.appendChild(listItem);
         });
-}
+    }
 
-function toggleMobileMenu() {
-    menuToggle.classList.toggle('is-active');
-    mobileDropdownMenu.classList.toggle('is-open');
-}
+    // Aggiorna la navigazione desktop, mostrando solo gli altri livelli
+    function updateDesktopNav(currentTierId) {
+        desktopNavLinks.innerHTML = '';
+        tiers
+            .filter(t => t.tierId !== currentTierId)
+            .forEach(tier => {
+                const link = document.createElement('a');
+                link.href = '#';
+                link.dataset.tierId = tier.tierId;
+                const textContent = tier.linkText.replace(/\s?\${1,3}$/, '');
+                const dollarSign = tier.linkText.includes('$$$') ? '$$$' : '$';
+                link.innerHTML = `${textContent}<span class="dollar-sign">${dollarSign}</span>`;
+                desktopNavLinks.appendChild(link);
+            });
+    }
 
-function setupEventListeners() {
-    menuToggle.addEventListener('click', toggleMobileMenu);
-
-    mobileMenuItemsList.addEventListener('click', (event) => {
-        event.preventDefault();
-        const linkElement = event.target.closest('a');
-        if (linkElement && linkElement.dataset.tierId) {
-            updatePageContent(linkElement.dataset.tierId);
-            if (mobileDropdownMenu.classList.contains('is-open')) {
-                toggleMobileMenu();
-            }
-        }
-    });
-
-    desktopNavLinks.addEventListener('click', (event) => {
-        event.preventDefault();
-        const linkElement = event.target.closest('a');
-        if (linkElement && linkElement.dataset.tierId) {
-            updatePageContent(linkElement.dataset.tierId);
-        }
-    });
-    
-    stripeButtons.forEach(button => {
-        button.addEventListener('click', async () => {
-            const price = button.dataset.price;
-            const tierId = button.dataset.tierId;
-            const dropdownText = button.dataset.dropdownText;
-            try {
-                // CORREZIONE: Aggiunto /api/
-                const response = await fetch('/api/create-checkout-session', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ price: parseFloat(price), tierId, dropdownText }),
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const session = await response.json();
-                if (session.id) {
-                    stripe.redirectToCheckout({ sessionId: session.id });
-                }
-            } catch (error) {
-                console.error('Error during checkout session creation:', error);
-            }
+    // Imposta tutti gli "ascoltatori di eventi" della pagina
+    function setupEventListeners() {
+        // Gestisce l'apertura/chiusura del menu mobile
+        menuToggle.addEventListener('click', () => {
+            menuToggle.classList.toggle('is-active');
+            mobileDropdownMenu.classList.toggle('is-open');
         });
-    });
-}
 
-async function loadInitialCounts() {
-    try {
-        // CORREZIONE: Aggiunto /api/
-        const response = await fetch('/api/get-count');
-        if (!response.ok) {
-            throw new Error(`Network response was not ok for /get-count. Status: ${response.status}`);
+        // Gestore unico per i click sui link di navigazione (mobile e desktop)
+        const navClickHandler = (event) => {
+            event.preventDefault();
+            const linkElement = event.target.closest('a');
+            if (linkElement && linkElement.dataset.tierId) {
+                updatePageContent(linkElement.dataset.tierId);
+                // Chiude il menu mobile se è aperto dopo un click
+                if (mobileDropdownMenu.classList.contains('is-open')) {
+                    menuToggle.classList.remove('is-active');
+                    mobileDropdownMenu.classList.remove('is-open');
+                }
+            }
+        };
+
+        mobileMenuItemsList.addEventListener('click', navClickHandler);
+        desktopNavLinks.addEventListener('click', navClickHandler);
+        
+        // Aggiunge l'evento di pagamento a tutti i pulsanti Stripe
+        stripeButtons.forEach(button => {
+            button.addEventListener('click', async () => {
+                const price = button.dataset.price;
+                const tierId = button.dataset.tierId;
+                const dropdownText = button.dataset.dropdownText;
+                try {
+                    // *** LA CORREZIONE FINALE È QUI ***
+                    // Chiama la rotta API corretta per creare la sessione di checkout
+                    const response = await fetch('/api/create-checkout-session', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ price: parseFloat(price), tierId, dropdownText }),
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const session = await response.json();
+                    if (session.id) {
+                        stripe.redirectToCheckout({ sessionId: session.id });
+                    }
+                } catch (error) {
+                    console.error('Error during checkout session creation:', error);
+                }
+            });
+        });
+    }
+
+    // --- Funzione di Inizializzazione ---
+    function initializePage() {
+        populateMobileMenu();
+        // Inizializza la pagina con il primo livello di prezzo come predefinito
+        const initialTier = tiers[0];
+        if (initialTier) {
+            updatePageContent(initialTier.tierId);
         }
-        const counts = await response.json();
-        console.log('Initial counts loaded successfully:', counts);
-    } catch (error) {
-        console.error('Failed to load initial counts:', error);
+        setupEventListeners();
     }
-}
 
-function initializePage() {
-    populateMobileMenu();
-    
-    const urlParams = new URLSearchParams(window.location.search);
-    const tierIdFromUrl = urlParams.get('tierId');
-    const initialTier = tiers.find(t => t.tierId === tierIdFromUrl) || tiers[0];
-    
-    if (initialTier) {
-        updatePageContent(initialTier.tierId);
-    }
-    
-    setupEventListeners();
-
-    loadInitialCounts(); 
-}
-
-// Avvio
-initializePage();
+    // Avvia l'applicazione
+    initializePage();
+});
