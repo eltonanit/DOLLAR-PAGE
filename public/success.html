@@ -12,14 +12,12 @@
             max-width: 800px;
             padding: 20px;
             margin: 0 auto;
-            padding-top: 100px;
+            padding-top: 100px; /* Spazio per la navbar fissa */
             padding-bottom: 50px;
             text-align: center;
         }
         .count-number { font-size: 10rem; font-weight: 700; color: #000000; line-height: 1; }
         .main-text { font-size: 2.5rem; font-weight: 700; color: #1693A5; margin-top: 20px; max-width: 600px; margin-left: auto; margin-right: auto;}
-        
-        /* --- STILI AGGIORNATI PER MAGGIORE VISIBILITÀ --- */
         .sub-text {
             font-size: 1.5rem;
             color: #555;
@@ -46,8 +44,6 @@
             line-height: 1.5;
             font-weight: 800;
         }
-        
-        /* Stili per "See Also" in fondo */
         .see-also-container { margin-top: 40px; text-align: center; border-top: 1px solid #e0e0e0; padding-top: 30px; }
         .see-also-container h3 { font-weight: bold; color: #1d315d; margin-bottom: 15px; }
         .see-also-links-wrapper { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
@@ -114,93 +110,123 @@
             { value: 999999, tierId: '1M_dollars', displayText: '1 MILLION DOLLARS', menuText: 'How many paid 1,000,000$', linkText: '1 Million $$$' }
         ];
 
-        window.onload = async () => {
-            // === LOGICA DEI MENU (Mobile e Desktop) ===
+        // Funzione per aggiornare la navigazione (desktop, mobile e "see also")
+        function updateNav(currentTierId) {
             const menuToggle = document.getElementById('menu-toggle');
             const mobileDropdownMenu = document.getElementById('mobile-dropdown-menu');
             const mobileMenuItemsList = document.getElementById('mobile-menu-items-list');
             const desktopNavLinks = document.getElementById('desktop-nav-links');
+            const seeAlsoLinksWrapper = document.getElementById('see-also-links-wrapper');
+            
+            // Pulisce i menu esistenti
+            if (desktopNavLinks) desktopNavLinks.innerHTML = '';
+            if (mobileMenuItemsList) mobileMenuItemsList.innerHTML = '';
+            if (seeAlsoLinksWrapper) seeAlsoLinksWrapper.innerHTML = '';
 
-            function populateMobileMenu() {
-                mobileMenuItemsList.innerHTML = '';
-                tiers.forEach(tier => {
-                    const listItem = document.createElement('li');
-                    const link = document.createElement('a');
-                    link.href = `/?tierId=${tier.tierId}`;
-                    const phrase = "How many paid ";
-                    const priceText = tier.linkText.replace(/\s?\${1,3}$/, '');
-                    const dollarSign = tier.linkText.includes('$$$') ? '$$$' : '$';
-                    link.innerHTML = `${phrase}<strong>${priceText}</strong><span class="dollar-sign">${dollarSign}</span>`;
-                    listItem.appendChild(link);
-                    mobileMenuItemsList.appendChild(listItem);
+            const otherTiers = tiers.filter(t => t.tierId !== currentTierId);
+            
+            otherTiers.forEach(tier => {
+                const homeLink = `/?tierId=${tier.tierId}`;
+                const textContent = tier.linkText.replace(/\s?\${1,3}$/, '');
+                const dollarSign = tier.linkText.includes('$$$') ? '$$$' : '$';
+                
+                // Popola il menu Desktop
+                if (desktopNavLinks) {
+                    const desktopLink = document.createElement('a');
+                    desktopLink.href = homeLink;
+                    desktopLink.innerHTML = `${textContent}<span class="dollar-sign">${dollarSign}</span>`;
+                    desktopNavLinks.appendChild(desktopLink);
+                }
+
+                // Popola il menu Mobile
+                if (mobileMenuItemsList) {
+                    const mobileListItem = document.createElement('li');
+                    const mobileLink = document.createElement('a');
+                    mobileLink.href = homeLink;
+                    mobileLink.innerHTML = `How many paid <strong>${textContent}</strong><span class="dollar-sign">${dollarSign}</span>`;
+                    mobileListItem.appendChild(mobileLink);
+                    mobileMenuItemsList.appendChild(mobileListItem);
+                }
+
+                // Popola i link "See Also"
+                if (seeAlsoLinksWrapper) {
+                    const seeAlsoLink = document.createElement('a');
+                    seeAlsoLink.href = homeLink;
+                    seeAlsoLink.textContent = tier.linkText;
+                    seeAlsoLinksWrapper.appendChild(seeAlsoLink);
+                }
+            });
+
+            // Aggiunge l'evento al pulsante hamburger
+            if (menuToggle) {
+                menuToggle.addEventListener('click', () => {
+                    menuToggle.classList.toggle('is-active');
+                    mobileDropdownMenu.classList.toggle('is-open');
                 });
             }
+        }
 
-            function updateDesktopNav(currentTierId) {
-                if (!desktopNavLinks) return;
-                desktopNavLinks.innerHTML = '';
-                tiers
-                    .filter(t => t.tierId !== currentTierId)
-                    .forEach(tier => {
-                        const link = document.createElement('a');
-                        link.href = `/?tierId=${tier.tierId}`;
-                        const textContent = tier.linkText.replace(/\s?\${1,3}$/, '');
-                        const dollarSign = tier.linkText.includes('$$$') ? '$$$' : '$';
-                        link.innerHTML = `${textContent}<span class="dollar-sign">${dollarSign}</span>`;
-                        desktopNavLinks.appendChild(link);
-                    });
-            }
-
-            function toggleMobileMenu() {
-                menuToggle.classList.toggle('is-active');
-                mobileDropdownMenu.classList.toggle('is-open');
-            }
-
-            menuToggle.addEventListener('click', toggleMobileMenu);
-            populateMobileMenu();
-            
-            // === LOGICA DELLA PAGINA DI SUCCESSO ===
+        // Funzione principale che viene eseguita al caricamento della pagina
+        window.onload = async () => {
+            // Seleziona gli elementi della pagina
             const countElement = document.getElementById('count-number');
             const tierTextElement = document.getElementById('tier-text');
             const tierTextElement2 = document.getElementById('tier-text-2');
             const timestampElement = document.getElementById('timestamp');
-            const seeAlsoLinksWrapper = document.getElementById('see-also-links-wrapper');
+
+            // Legge il tierId dall'URL
             const urlParams = new URLSearchParams(window.location.search);
             const tierId = urlParams.get('tierId');
 
-            if (!tierId) { countElement.textContent = 'Error'; return; }
-            
-            updateDesktopNav(tierId);
-            
-            tiers.filter(t => t.tierId !== tierId).forEach(tier => {
-                const link = document.createElement('a');
-                link.href = `/?tierId=${tier.tierId}`;
-                link.textContent = tier.linkText;
-                seeAlsoLinksWrapper.appendChild(link);
-            });
+            if (!tierId) {
+                countElement.textContent = 'Error';
+                return;
+            }
 
+            // Popola tutti i menu e i link di navigazione
+            updateNav(tierId);
+
+            // Aggiorna il testo dinamico della pagina
             const selectedTier = tiers.find(t => t.tierId === tierId);
             if (selectedTier) {
                 tierTextElement.textContent = selectedTier.displayText;
                 tierTextElement2.textContent = selectedTier.displayText;
             }
-            
+
+            // Imposta il timestamp attuale
             const now = new Date();
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' };
             timestampElement.textContent = now.toLocaleDateString('en-US', options).toUpperCase();
+            
+            // Funzione per recuperare il conteggio con tentativi per gestire il ritardo del webhook
+            const fetchCountWithRetries = async (retries = 5, initialDelay = 400) => {
+                for (let i = 0; i < retries; i++) {
+                    try {
+                        const response = await fetch('/api/get-count');
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        const allCounts = await response.json();
+                        const currentCount = allCounts[tierId];
 
-            try {
-                setTimeout(async () => {
-                    const response = await fetch(`/get-count/${tierId}`);
-                    if (!response.ok) throw new Error('Failed to fetch count');
-                    const data = await response.json();
-                    countElement.textContent = data.count;
-                }, 500);
-            } catch (error) {
-                console.error('Error:', error);
-                countElement.textContent = 'X';
-            }
+                        // Mostra il risultato se è valido (esiste ed è > 0)
+                        if (currentCount !== undefined && currentCount > 0) {
+                            countElement.textContent = currentCount.toLocaleString('en-US');
+                            return; // Successo, esci dalla funzione
+                        }
+                    } catch (error) {
+                        console.error(`Attempt ${i + 1} failed:`, error);
+                    }
+                    // Attendi prima del prossimo tentativo
+                    await new Promise(resolve => setTimeout(resolve, initialDelay * (i + 1)));
+                }
+                // Se tutti i tentativi falliscono, mostra un simbolo di errore
+                countElement.textContent = '?';
+                console.error('Could not retrieve a valid count after all retries.');
+            };
+
+            // Avvia il processo di recupero del conteggio
+            fetchCountWithRetries();
         };
     </script>
+
 </body>
 </html>
