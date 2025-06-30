@@ -13,27 +13,40 @@ const pool = new Pool({
 
 // Funzione per creare la tabella se non esiste
 async function createTable() {
-    const client = await pool.connect();
     try {
-        await client.query(`
-            CREATE TABLE IF NOT EXISTS counters (
-                "tierId" TEXT PRIMARY KEY,
-                count INTEGER NOT NULL DEFAULT 0
-            );
-        `);
-        console.log('Table "counters" is ready.');
+        const client = await pool.connect();
+        try {
+            await client.query(`
+                CREATE TABLE IF NOT EXISTS counters (
+                    "tierId" TEXT PRIMARY KEY,
+                    count INTEGER NOT NULL DEFAULT 0
+                );
+            `);
+            // Inizializza i contatori se non esistono
+            const tiers = ['1_dollar', '10_dollars', '100_dollars', '1000_dollars', '10000_dollars', '100000_dollars', '1M_dollars'];
+            for (const tierId of tiers) {
+                await client.query('INSERT INTO counters ("tierId", count) VALUES ($1, 0) ON CONFLICT ("tierId") DO NOTHING', [tierId]);
+            }
+            console.log('Table "counters" is ready and initialized.');
+        } catch (err) {
+            console.error('Error during table creation/initialization:', err);
+        } finally {
+            client.release();
+        }
     } catch (err) {
-        console.error('Error creating table:', err);
-    } finally {
-        client.release();
+        console.error('Error connecting to the database:', err);
     }
 }
 createTable();
 
 const app = express();
 
-// Middleware per il webhook (deve venire PRIMA di express.json())
-// CORRETTO: Aggiunto /api/
+// ***** CORREZIONE FINALE *****
+// Diciamo a Express di servire i file statici (index.html, style.css, etc.)
+// dalla cartella principale del progetto. Questa riga deve venire PRIMA delle rotte API.
+app.use(express.static(path.join(__dirname)));
+
+// Middleware per il webhook. Deve usare express.raw e avere il prefisso /api
 app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), async (request, response) => {
     const sig = request.headers['stripe-signature'];
     let event;
@@ -59,10 +72,10 @@ app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), async
     response.json({ received: true });
 });
 
+// Middleware per parsare JSON per le altre rotte API
 app.use(express.json());
 
 // Rotta per creare la sessione di checkout
-// CORRETTO: Aggiunto /api/
 app.post('/api/create-checkout-session', async (req, res) => {
     const { price, tierId, dropdownText } = req.body;
     try {
@@ -82,7 +95,6 @@ app.post('/api/create-checkout-session', async (req, res) => {
 });
 
 // Rotta per ottenere i conteggi iniziali
-// CORRETTO: Aggiunto /api/
 app.get('/api/get-count', async (req, res) => {
     try {
         const result = await pool.query('SELECT "tierId", count FROM counters');
@@ -92,6 +104,7 @@ app.get('/api/get-count', async (req, res) => {
         }, {});
         res.json(counts);
     } catch (err) {
+        console.error('DB Error on get-count:', err.message);
         res.status(500).json({ error: err.message });
     }
 });
