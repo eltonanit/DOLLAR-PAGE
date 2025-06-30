@@ -1,17 +1,17 @@
 const express = require('express');
-const { Pool } = require('pg'); // NUOVA LIBRERIA
+const { Pool } = require('pg');
 const path = require('path');
 
-// Le chiavi di Stripe sono già a posto!
+// Legge le chiavi segrete dalle variabili d'ambiente di Vercel
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-// NUOVO: Connessione a Vercel Postgres
+// Connessione a Vercel Postgres
 const pool = new Pool({
   connectionString: process.env.POSTGRES_URL + "?sslmode=require",
 });
 
-// NUOVO: Funzione per creare la tabella se non esiste
+// Funzione per creare la tabella se non esiste
 async function createTable() {
     const client = await pool.connect();
     try {
@@ -28,12 +28,13 @@ async function createTable() {
         client.release();
     }
 }
-createTable(); // Eseguiamo la funzione all'avvio
+createTable();
 
 const app = express();
-app.use(express.static(path.join(__dirname)));
 
-app.post('/stripe-webhook', express.raw({ type: 'application/json' }), async (request, response) => {
+// Middleware per il webhook (deve venire PRIMA di express.json())
+// CORRETTO: Aggiunto /api/
+app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), async (request, response) => {
     const sig = request.headers['stripe-signature'];
     let event;
     try {
@@ -48,7 +49,6 @@ app.post('/stripe-webhook', express.raw({ type: 'application/json' }), async (re
         const tierId = session.metadata.tierId;
         if (tierId) {
             try {
-                // NUOVO: Query di aggiornamento per Postgres
                 await pool.query('UPDATE counters SET count = count + 1 WHERE "tierId" = $1', [tierId]);
                 console.log(`✅ Counter for ${tierId} incremented.`);
             } catch (err) {
@@ -61,7 +61,9 @@ app.post('/stripe-webhook', express.raw({ type: 'application/json' }), async (re
 
 app.use(express.json());
 
-app.post('/create-checkout-session', async (req, res) => {
+// Rotta per creare la sessione di checkout
+// CORRETTO: Aggiunto /api/
+app.post('/api/create-checkout-session', async (req, res) => {
     const { price, tierId, dropdownText } = req.body;
     try {
         const session = await stripe.checkout.sessions.create({
@@ -79,9 +81,10 @@ app.post('/create-checkout-session', async (req, res) => {
     }
 });
 
-app.get('/get-count', async (req, res) => {
+// Rotta per ottenere i conteggi iniziali
+// CORRETTO: Aggiunto /api/
+app.get('/api/get-count', async (req, res) => {
     try {
-        // NUOVO: Query di selezione per Postgres
         const result = await pool.query('SELECT "tierId", count FROM counters');
         const counts = result.rows.reduce((acc, row) => {
             acc[row.tierId] = row.count;
@@ -93,4 +96,5 @@ app.get('/get-count', async (req, res) => {
     }
 });
 
+// Esporta l'app per Vercel
 module.exports = app;

@@ -77,6 +77,7 @@ function toggleMobileMenu() {
 
 function setupEventListeners() {
     menuToggle.addEventListener('click', toggleMobileMenu);
+
     mobileMenuItemsList.addEventListener('click', (event) => {
         event.preventDefault();
         const linkElement = event.target.closest('a');
@@ -102,13 +103,13 @@ function setupEventListeners() {
             const tierId = button.dataset.tierId;
             const dropdownText = button.dataset.dropdownText;
             try {
-                const response = await fetch('/create-checkout-session', {
+                // CORREZIONE: Aggiunto /api/
+                const response = await fetch('/api/create-checkout-session', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ price: parseFloat(price), tierId, dropdownText }),
                 });
                 
-                // Aggiungiamo un controllo per l'errore 404
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -118,23 +119,21 @@ function setupEventListeners() {
                     stripe.redirectToCheckout({ sessionId: session.id });
                 }
             } catch (error) {
-                // Modifichiamo il log dell'errore per essere più specifici
                 console.error('Error during checkout session creation:', error);
             }
         });
     });
 }
 
-// NUOVO - Funzione per caricare i conteggi iniziali dal server
 async function loadInitialCounts() {
     try {
-        const response = await fetch('/get-count');
+        // CORREZIONE: Aggiunto /api/
+        const response = await fetch('/api/get-count');
         if (!response.ok) {
             throw new Error(`Network response was not ok for /get-count. Status: ${response.status}`);
         }
         const counts = await response.json();
         console.log('Initial counts loaded successfully:', counts);
-        // Qui potresti aggiungere la logica per mostrare i conteggi se lo desideri
     } catch (error) {
         console.error('Failed to load initial counts:', error);
     }
@@ -153,8 +152,8 @@ function initializePage() {
     
     setupEventListeners();
 
-    // NUOVO - Chiamiamo la funzione per caricare i conteggi all'avvio
     loadInitialCounts(); 
 }
 
+// Avvio
 initializePage();
