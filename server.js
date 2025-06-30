@@ -2,88 +2,66 @@ const express = require('express');
 const { Pool } = require('pg');
 const path = require('path');
 
-// Legge le chiavi segrete dalle variabili d'ambiente di Vercel
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-// Connessione a Vercel Postgres
 const pool = new Pool({
   connectionString: process.env.POSTGRES_URL + "?sslmode=require",
 });
 
-// Funzione per creare la tabella e inizializzare i dati se non esistono
-async function createTable() {
+const ALL_TIERS = ['1_dollar', '10_dollars', '100_dollars', '1000_dollars', '10000_dollars', '100000_dollars', '1M_dollars'];
+
+// Funzione di inizializzazione
+async function initializeDatabase() {
     try {
         const client = await pool.connect();
         try {
-            // Crea la tabella se non esiste
             await client.query(`
                 CREATE TABLE IF NOT EXISTS counters (
                     "tierId" TEXT PRIMARY KEY,
                     count INTEGER NOT NULL DEFAULT 0
                 );
             `);
-            
-            // Inizializza i contatori per ogni livello di prezzo se non sono già presenti
-            const tiers = ['1_dollar', '10_dollars', '100_dollars', '1000_dollars', '10000_dollars', '100000_dollars', '1M_dollars'];
-            for (const tierId of tiers) {
-                // Inserisce solo se la tierId non esiste, per evitare errori di chiave duplicata
+            for (const tierId of ALL_TIERS) {
                 await client.query('INSERT INTO counters ("tierId", count) VALUES ($1, 0) ON CONFLICT ("tierId") DO NOTHING', [tierId]);
             }
-            console.log('Table "counters" is ready and initialized.');
-        } catch (err) {
-            console.error('Error during table creation/initialization:', err);
+            console.log('Database initialized successfully.');
         } finally {
-            // Rilascia sempre il client alla fine
             client.release();
         }
     } catch (err) {
-        // Logga errori di connessione al database
-        console.error('Error connecting to the database:', err);
+        console.error('DATABASE INITIALIZATION FAILED:', err);
     }
 }
-// Esegui la funzione all'avvio del server
-createTable();
+initializeDatabase();
 
 const app = express();
 
-// ***** CORREZIONE CHIAVE *****
-// La riga app.use(express.static(...)) è stata rimossa per evitare conflitti
-// con il modo in cui Vercel serve i file statici. La gestione dei file
-// statici è ora delegata interamente a Vercel, mentre questo server
-// gestisce solo le rotte che iniziano con /api/.
-
-// Middleware per il webhook (deve usare express.raw e avere il prefisso /api)
+// Webhook
 app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), async (request, response) => {
+    // ... codice webhook identico ...
     const sig = request.headers['stripe-signature'];
     let event;
     try {
         event = stripe.webhooks.constructEvent(request.body, sig, webhookSecret);
     } catch (err) {
-        console.log(`❌ Webhook Error: ${err.message}`);
         return response.status(400).send(`Webhook Error: ${err.message}`);
     }
-
     if (event.type === 'checkout.session.completed') {
         const session = event.data.object;
         const tierId = session.metadata.tierId;
         if (tierId) {
-            try {
-                await pool.query('UPDATE counters SET count = count + 1 WHERE "tierId" = $1', [tierId]);
-                console.log(`✅ Counter for ${tierId} incremented.`);
-            } catch (err) {
-                console.error('DB Error on update:', err.message);
-            }
+            await pool.query('UPDATE counters SET count = count + 1 WHERE "tierId" = $1', [tierId]);
         }
     }
     response.json({ received: true });
 });
 
-// Middleware per parsare JSON per le altre rotte API
 app.use(express.json());
 
-// Rotta per creare la sessione di checkout
+// Create Checkout Session
 app.post('/api/create-checkout-session', async (req, res) => {
+    // ... codice checkout identico ...
     const { price, tierId, dropdownText } = req.body;
     try {
         const session = await stripe.checkout.sessions.create({
@@ -96,25 +74,48 @@ app.post('/api/create-checkout-session', async (req, res) => {
         });
         res.json({ id: session.id });
     } catch (e) {
-        console.error('Stripe session creation error:', e);
         res.status(500).json({ error: e.message });
     }
 });
 
-// Rotta per ottenere i conteggi iniziali
+// ***** MODIFICA CHIAVE QUI *****
+// Rotta "corazzata" per ottenere i conteggi
 app.get('/api/get-count', async (req, res) => {
     try {
         const result = await pool.query('SELECT "tierId", count FROM counters');
-        const counts = result.rows.reduce((acc, row) => {
+        let counts = result.rows.reduce((acc, row) => {
             acc[row.tierId] = row.count;
             return acc;
         }, {});
+
+        // CONTROLLO DI SICUREZZA: se qualche tier manca, lo aggiungiamo ora!
+        let needsUpdate = false;
+        for (const tierId of ALL_TIERS) {
+            if (counts[tierId] === undefined) {
+                counts[tierId] = 0;
+                needsUpdate = true;
+            }
+        }
+        
+        // Se mancava qualcosa, lo scriviamo sul DB per le prossime volte
+        if (needsUpdate) {
+            const client = await pool.connect();
+            try {
+                for (const tierId of ALL_TIERS) {
+                    await client.query('INSERT INTO counters ("tierId", count) VALUES ($1, 0) ON CONFLICT ("tierId") DO NOTHING', [tierId]);
+                }
+                console.log('GUARDIAN: A missing tier was found and initialized.');
+            } finally {
+                client.release();
+            }
+        }
+        
         res.json(counts);
+
     } catch (err) {
         console.error('DB Error on get-count:', err.message);
         res.status(500).json({ error: err.message });
     }
 });
 
-// Esporta l'app per Vercel
 module.exports = app;
