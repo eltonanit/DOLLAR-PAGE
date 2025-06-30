@@ -11,42 +11,49 @@ const pool = new Pool({
   connectionString: process.env.POSTGRES_URL + "?sslmode=require",
 });
 
-// Funzione per creare la tabella se non esiste
+// Funzione per creare la tabella e inizializzare i dati se non esistono
 async function createTable() {
     try {
         const client = await pool.connect();
         try {
+            // Crea la tabella se non esiste
             await client.query(`
                 CREATE TABLE IF NOT EXISTS counters (
                     "tierId" TEXT PRIMARY KEY,
                     count INTEGER NOT NULL DEFAULT 0
                 );
             `);
-            // Inizializza i contatori se non esistono
+            
+            // Inizializza i contatori per ogni livello di prezzo se non sono già presenti
             const tiers = ['1_dollar', '10_dollars', '100_dollars', '1000_dollars', '10000_dollars', '100000_dollars', '1M_dollars'];
             for (const tierId of tiers) {
+                // Inserisce solo se la tierId non esiste, per evitare errori di chiave duplicata
                 await client.query('INSERT INTO counters ("tierId", count) VALUES ($1, 0) ON CONFLICT ("tierId") DO NOTHING', [tierId]);
             }
             console.log('Table "counters" is ready and initialized.');
         } catch (err) {
             console.error('Error during table creation/initialization:', err);
         } finally {
+            // Rilascia sempre il client alla fine
             client.release();
         }
     } catch (err) {
+        // Logga errori di connessione al database
         console.error('Error connecting to the database:', err);
     }
 }
+// Esegui la funzione all'avvio del server
 createTable();
 
 const app = express();
 
-// ***** CORREZIONE FINALE *****
-// Diciamo a Express di servire i file statici (index.html, style.css, etc.)
-// dalla cartella principale del progetto. Questa riga deve venire PRIMA delle rotte API.
-app.use(express.static(path.join(__dirname)));
+// ***** CORREZIONE CHIAVE *****
+// La riga app.use(express.static(...)) è stata rimossa per evitare conflitti
+// con il modo in cui Vercel serve i file statici. La gestione dei file
+// statici è ora delegata interamente a Vercel, mentre questo server
+// gestisce solo le rotte che iniziano con /api/.
 
-// Middleware per il webhook. Deve usare express.raw e avere il prefisso /api
+// Middleware per il webhook (deve usare express.raw e avere il prefisso /api)
 app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), async (request, response) => {
     const sig = request.headers['stripe-signature'];
     let event;
