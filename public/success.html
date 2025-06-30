@@ -131,7 +131,6 @@
             });
 
             if (menuToggle) {
-                // Rimuoviamo eventuali listener duplicati prima di aggiungerne uno nuovo
                 const newMenuToggle = menuToggle.cloneNode(true);
                 menuToggle.parentNode.replaceChild(newMenuToggle, menuToggle);
                 newMenuToggle.addEventListener('click', () => {
@@ -176,20 +175,15 @@
                         const allCounts = await response.json();
                         const currentCount = allCounts[tierId];
 
-                        // ***** LA CORREZIONE FINALE È QUI *****
-                        // Controlliamo se il conteggio è definito (es. 0, 1, 2...).
-                        // In questo modo, anche se il webhook non è ancora arrivato e il conteggio è 0,
-                        // ma tu sei il primo e sai che deve essere 1, lo mostriamo comunque.
                         if (currentCount !== undefined) {
-                            // Se il conteggio è 0, significa che siamo i primi. Mostriamo 1.
-                            const displayCount = currentCount === 0 ? 1 : currentCount;
+                            // Previsione Ottimistica: mostriamo il conteggio attuale + 1
+                            const displayCount = currentCount + 1;
                             countElement.textContent = displayCount.toLocaleString('en-US');
                             return; 
                         }
                     } catch (error) {
                         console.error(`Attempt ${i + 1} failed:`, error);
                     }
-                    // Attendi prima del prossimo tentativo, aumentando il ritardo
                     await new Promise(resolve => setTimeout(resolve, initialDelay + (i * 200)));
                 }
                 countElement.textContent = '?';
